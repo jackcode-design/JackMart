@@ -1,0 +1,16 @@
+name: Feature/Change Request
+description: Propose a feature for JackMart
+body:
+  - type: textarea
+    id: description
+    attributes: {label: Description}
+    validations: {required: true}
+  - type: textarea
+    id: motivation
+    attributes: {label: Motivation}
+  - type: textarea
+    id: acceptance
+    attributes: {label: Acceptance criteria}
+  - type: textarea
+    id: layers
+    attributes: {label: Affected layers}
