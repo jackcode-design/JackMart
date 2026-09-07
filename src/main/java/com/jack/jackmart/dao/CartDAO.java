@@ -1,0 +1,3 @@
+package com.jack.jackmart.dao;
+import com.jack.jackmart.model.CartItem; import java.util.List;
+public interface CartDAO { List<CartItem> findByUser(long userId)throws Exception; void add(long userId,long productId,int qty)throws Exception; void update(long userId,long productId,int qty)throws Exception; void remove(long userId,long productId)throws Exception; void clear(long userId)throws Exception; }

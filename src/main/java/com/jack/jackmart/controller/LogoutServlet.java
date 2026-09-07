@@ -1,0 +1,3 @@
+package com.jack.jackmart.controller;
+import javax.servlet.*;import javax.servlet.http.*;import java.io.IOException;
+public class LogoutServlet extends HttpServlet {protected void doGet(HttpServletRequest r,HttpServletResponse s)throws IOException{HttpSession x=r.getSession(false);if(x!=null)x.invalidate();s.sendRedirect(r.getContextPath()+"/");}}

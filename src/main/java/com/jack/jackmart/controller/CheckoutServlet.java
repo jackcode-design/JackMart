@@ -1,0 +1,6 @@
+package com.jack.jackmart.controller;
+import com.jack.jackmart.listener.DatabaseInitializer;import com.jack.jackmart.dao.jdbc.*;import com.jack.jackmart.service.*;import com.jack.jackmart.model.User;import javax.servlet.*;import javax.servlet.http.*;import java.io.IOException;
+public class CheckoutServlet extends HttpServlet {private CartService cart;private OrderService order;public void init(){var ds=DatabaseInitializer.dataSource(getServletContext());var cd=new CartDAOImpl(ds);cart=new CartService(cd);order=new OrderService(new OrderDAOImpl(ds),cd);}
+ protected void doGet(HttpServletRequest r,HttpServletResponse s)throws ServletException,IOException{try{User u=(User)r.getSession().getAttribute("user");r.setAttribute("total",cart.total(u.getId()));r.getRequestDispatcher("/WEB-INF/jsp/checkout.jsp").forward(r,s);}catch(Exception e){throw new ServletException(e);}}
+ protected void doPost(HttpServletRequest r,HttpServletResponse s)throws IOException{try{User u=(User)r.getSession().getAttribute("user");order.checkout(u.getId());s.sendRedirect(r.getContextPath()+"/orders");}catch(Exception e){throw new RuntimeException(e);}}
+}

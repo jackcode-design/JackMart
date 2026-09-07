@@ -1,0 +1,10 @@
+package com.jack.jackmart.dao.jdbc;
+import com.jack.jackmart.dao.CartDAO; import com.jack.jackmart.model.CartItem; import javax.sql.DataSource; import java.sql.*; import java.util.*;
+public class CartDAOImpl implements CartDAO {
+ private final DataSource ds; public CartDAOImpl(DataSource ds){this.ds=ds;}
+ public List<CartItem> findByUser(long uid)throws Exception{String sql="SELECT c.id,c.user_id,c.product_id,p.name,c.quantity,p.price FROM cart_items c JOIN products p ON p.id=c.product_id WHERE c.user_id=?";List<CartItem> out=new ArrayList<>();try(Connection c=ds.getConnection();PreparedStatement p=c.prepareStatement(sql)){p.setLong(1,uid);try(ResultSet r=p.executeQuery()){while(r.next()){CartItem i=new CartItem();i.setId(r.getLong(1));i.setUserId(r.getLong(2));i.setProductId(r.getLong(3));i.setProductName(r.getString(4));i.setQuantity(r.getInt(5));i.setUnitPrice(r.getBigDecimal(6));out.add(i);}}}return out;}
+ public void add(long uid,long pid,int qty)throws Exception{String sql="MERGE INTO cart_items(user_id,product_id,quantity) KEY(user_id,product_id) VALUES(?,?,COALESCE((SELECT quantity FROM cart_items WHERE user_id=? AND product_id=?),0)+?)";try(Connection c=ds.getConnection();PreparedStatement p=c.prepareStatement(sql)){p.setLong(1,uid);p.setLong(2,pid);p.setInt(3,qty);p.setLong(4,uid);p.setLong(5,pid);p.setInt(6,qty);p.executeUpdate();}}
+ public void update(long uid,long pid,int qty)throws Exception{String sql="UPDATE cart_items SET quantity=? WHERE user_id=? AND product_id=?";try(Connection c=ds.getConnection();PreparedStatement p=c.prepareStatement(sql)){p.setInt(1,qty);p.setLong(2,uid);p.setLong(3,pid);p.executeUpdate();}}
+ public void remove(long uid,long pid)throws Exception{String sql="DELETE FROM cart_items WHERE user_id=? AND product_id=?";try(Connection c=ds.getConnection();PreparedStatement p=c.prepareStatement(sql)){p.setLong(1,uid);p.setLong(2,pid);p.executeUpdate();}}
+ public void clear(long uid)throws Exception{String sql="DELETE FROM cart_items WHERE user_id=?";try(Connection c=ds.getConnection();PreparedStatement p=c.prepareStatement(sql)){p.setLong(1,uid);p.executeUpdate();}}
+}

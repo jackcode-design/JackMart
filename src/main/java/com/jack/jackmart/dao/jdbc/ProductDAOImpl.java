@@ -1,0 +1,9 @@
+package com.jack.jackmart.dao.jdbc;
+import com.jack.jackmart.dao.ProductDAO; import com.jack.jackmart.model.Product; import javax.sql.DataSource; import java.sql.*; import java.util.*;
+public class ProductDAOImpl implements ProductDAO {
+ private final DataSource ds; public ProductDAOImpl(DataSource ds){this.ds=ds;}
+ public List<Product> search(String q,String category)throws Exception{String sql="SELECT id,seller_id,name,description,price,stock_qty,category,image_url,created_at FROM products WHERE (?='' OR LOWER(name) LIKE LOWER(?)) AND (?='' OR LOWER(category)=LOWER(?)) ORDER BY id DESC";List<Product> out=new ArrayList<>();
+  try(Connection c=ds.getConnection();PreparedStatement p=c.prepareStatement(sql)){String qq=q==null?"":q.trim(),cc=category==null?"":category.trim();p.setString(1,qq);p.setString(2,"%"+qq+"%");p.setString(3,cc);p.setString(4,cc);try(ResultSet r=p.executeQuery()){while(r.next())out.add(map(r));}}return out;}
+ public Product findById(long id)throws Exception{String sql="SELECT id,seller_id,name,description,price,stock_qty,category,image_url,created_at FROM products WHERE id=?";try(Connection c=ds.getConnection();PreparedStatement p=c.prepareStatement(sql)){p.setLong(1,id);try(ResultSet r=p.executeQuery()){return r.next()?map(r):null;}}}
+ private Product map(ResultSet r)throws SQLException{Product p=new Product();p.setId(r.getLong(1));p.setSellerId(r.getLong(2));p.setName(r.getString(3));p.setDescription(r.getString(4));p.setPrice(r.getBigDecimal(5));p.setStockQty(r.getInt(6));p.setCategory(r.getString(7));p.setImageUrl(r.getString(8));p.setCreatedAt(r.getTimestamp(9).toLocalDateTime());return p;}
+}

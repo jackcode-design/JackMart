@@ -1,0 +1,10 @@
+package com.jack.jackmart.listener;
+import com.zaxxer.hikari.*;import com.jack.jackmart.util.PasswordUtil;import javax.servlet.*;import javax.sql.DataSource;import java.io.*;import java.nio.charset.StandardCharsets;import java.sql.*;
+public class DatabaseInitializer implements ServletContextListener {
+ private static HikariDataSource ds;
+ public void contextInitialized(ServletContextEvent e){try{HikariConfig c=new HikariConfig();c.setJdbcUrl(System.getenv().getOrDefault("JACKMART_DB_URL","jdbc:h2:./data/jackmart"));c.setUsername(System.getenv().getOrDefault("JACKMART_DB_USER","sa"));c.setPassword(System.getenv().getOrDefault("JACKMART_DB_PASSWORD",""));c.setMaximumPoolSize(10);ds=new HikariDataSource(c);runSql("/db/schema.sql");seedUsers();runSql("/db/seed.sql");e.getServletContext().setAttribute("dataSource",ds);}catch(Exception ex){throw new RuntimeException("Database initialization failed",ex);}}
+ public void contextDestroyed(ServletContextEvent e){if(ds!=null)ds.close();}
+ private void runSql(String path)throws Exception{String sql=new String(getClass().getResourceAsStream(path).readAllBytes(),StandardCharsets.UTF_8);try(Connection c=ds.getConnection();Statement s=c.createStatement()){for(String part:sql.split(";")){String x=part.trim();if(!x.isEmpty())s.execute(x);}}}
+ private void seedUsers()throws Exception{String sql="MERGE INTO users(email,name,password_hash,role) KEY(email) VALUES(?,?,?,?)";try(Connection c=ds.getConnection();PreparedStatement p=c.prepareStatement(sql)){p.setString(1,"admin@jackmart.local");p.setString(2,"JackMart Admin");p.setString(3,PasswordUtil.hash("Admin@123"));p.setString(4,"ADMIN");p.addBatch();p.setString(1,"seller@jackmart.local");p.setString(2,"Demo Seller");p.setString(3,PasswordUtil.hash("Seller@123"));p.setString(4,"SELLER");p.addBatch();p.executeBatch();}}
+ public static DataSource dataSource(ServletContext c){return (DataSource)c.getAttribute("dataSource");}
+}

@@ -1,0 +1,5 @@
+package com.jack.jackmart.controller;
+import com.jack.jackmart.listener.DatabaseInitializer;import com.jack.jackmart.dao.jdbc.OrderDAOImpl;import com.jack.jackmart.service.OrderService;import com.jack.jackmart.dao.jdbc.CartDAOImpl;import com.jack.jackmart.model.User;import javax.servlet.*;import javax.servlet.http.*;import java.io.IOException;
+public class OrderServlet extends HttpServlet {private OrderService service;public void init(){var ds=DatabaseInitializer.dataSource(getServletContext());service=new OrderService(new OrderDAOImpl(ds),new CartDAOImpl(ds));}
+ protected void doGet(HttpServletRequest r,HttpServletResponse s)throws ServletException,IOException{try{User u=(User)r.getSession().getAttribute("user");r.setAttribute("orders",service.history(u.getId()));r.getRequestDispatcher("/WEB-INF/jsp/orders.jsp").forward(r,s);}catch(Exception e){throw new ServletException(e);}}
+}

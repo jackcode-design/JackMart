@@ -1,0 +1,6 @@
+package com.jack.jackmart.controller;
+import com.jack.jackmart.listener.DatabaseInitializer;import com.jack.jackmart.dao.jdbc.UserDAOImpl;import com.jack.jackmart.service.UserService;import com.jack.jackmart.model.User;import javax.servlet.*;import javax.servlet.http.*;import java.io.IOException;import java.util.*;
+public class LoginServlet extends HttpServlet {private UserService service;public void init(){service=new UserService(new UserDAOImpl(DatabaseInitializer.dataSource(getServletContext())));}
+ protected void doGet(HttpServletRequest r,HttpServletResponse s)throws ServletException,IOException{r.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(r,s);}
+ protected void doPost(HttpServletRequest r,HttpServletResponse s)throws ServletException,IOException{try{Optional<User> u=service.login(r.getParameter("email"),r.getParameter("password"));if(u.isEmpty()){r.setAttribute("error","Invalid email or password");doGet(r,s);return;}HttpSession old=r.getSession(false);if(old!=null)old.invalidate();HttpSession session=r.getSession(true);session.setMaxInactiveInterval(1800);session.setAttribute("user",u.get());s.sendRedirect(r.getContextPath()+"/products");}catch(Exception e){throw new ServletException(e);}}
+}

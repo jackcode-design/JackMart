@@ -1,0 +1,9 @@
+package com.jack.jackmart.dao.jdbc;
+import com.jack.jackmart.dao.OrderDAO; import com.jack.jackmart.model.*; import javax.sql.DataSource; import java.sql.*; import java.util.*; import java.math.BigDecimal;
+public class OrderDAOImpl implements OrderDAO {
+ private final DataSource ds; public OrderDAOImpl(DataSource ds){this.ds=ds;}
+ public long create(long buyerId,List<CartItem> items)throws Exception{if(items.isEmpty())throw new IllegalArgumentException("Cart is empty");String os="INSERT INTO orders(buyer_id,status,total_amount) VALUES(?,?,?)";String is="INSERT INTO order_items(order_id,product_id,quantity,unit_price) VALUES(?,?,?,?)";BigDecimal total=items.stream().map(CartItem::getSubtotal).reduce(BigDecimal.ZERO,BigDecimal::add);
+  try(Connection c=ds.getConnection()){c.setAutoCommit(false);try(PreparedStatement op=c.prepareStatement(os,Statement.RETURN_GENERATED_KEYS);PreparedStatement ip=c.prepareStatement(is)){op.setLong(1,buyerId);op.setString(2,"CONFIRMED");op.setBigDecimal(3,total);op.executeUpdate();long id;try(ResultSet r=op.getGeneratedKeys()){r.next();id=r.getLong(1);}for(CartItem i:items){ip.setLong(1,id);ip.setLong(2,i.getProductId());ip.setInt(3,i.getQuantity());ip.setBigDecimal(4,i.getUnitPrice());ip.addBatch();}ip.executeBatch();c.commit();return id;}catch(Exception e){c.rollback();throw e;}}
+ }
+ public List<Order> findByBuyer(long uid)throws Exception{String sql="SELECT id,buyer_id,status,total_amount,created_at FROM orders WHERE buyer_id=? ORDER BY created_at DESC";List<Order> out=new ArrayList<>();try(Connection c=ds.getConnection();PreparedStatement p=c.prepareStatement(sql)){p.setLong(1,uid);try(ResultSet r=p.executeQuery()){while(r.next()){Order o=new Order();o.setId(r.getLong(1));o.setBuyerId(r.getLong(2));o.setStatus(r.getString(3));o.setTotalAmount(r.getBigDecimal(4));o.setCreatedAt(r.getTimestamp(5).toLocalDateTime());out.add(o);}}}return out;}
+}
