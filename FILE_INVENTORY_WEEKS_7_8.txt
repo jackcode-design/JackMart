@@ -1,0 +1,22 @@
+JackMart Weeks 7–8 add-on
+
+src/main/java/com/jack/jackmart/filter/SecurityHeadersFilter.java
+src/main/java/com/jack/jackmart/filter/RequestIdFilter.java
+src/main/java/com/jack/jackmart/util/SecurityUtil.java
+src/test/java/com/jack/jackmart/util/PasswordUtilTest.java
+src/test/java/com/jack/jackmart/filter/AuthFilterTest.java
+src/test/java/com/jack/jackmart/filter/RoleFilterTest.java
+src/test/java/com/jack/jackmart/dao/UserDAOImplTest.java
+src/test/java/com/jack/jackmart/service/ReviewServiceTest.java
+docs/WEEK_7_PLAN.md
+docs/WEEK_8_PLAN.md
+docs/WEEKS_7_8_SETUP.md
+docs/SECURITY_CHECKLIST.md
+docs/WEEK_8_DEPLOYMENT.md
+docs/WEEKS_7_8_TEST_CASES.md
+deploy/scripts/deploy.sh
+deploy/scripts/smoke-test.sh
+deploy/tomcat/setenv.sh.example
+deploy/nginx/jackmart.conf
+deploy/README.md
+RETRO_WEEKS_7_8.md

@@ -38,3 +38,35 @@ Register → login → browse products → add product to cart → review cart �
 - JSTL output escaping.
 - H2 credentials are environment-driven.
 - No real payment gateway is used.
+
+
+## Weeks 7–8 — Security, Testing and Deployment
+
+The Week 7–8 package adds:
+- security headers and request IDs;
+- hardened authentication/role filters;
+- automated password, filter, service and DAO tests;
+- SQL-injection regression coverage;
+- security and smoke-test checklists;
+- reproducible Tomcat deployment scripts;
+- health endpoint smoke testing;
+- deployment/backup runbook.
+
+### Build and test
+
+```bash
+mvn clean test
+mvn clean package
+```
+
+### Deployment
+
+See `docs/WEEK_8_DEPLOYMENT.md` and `deploy/README.md`.
+
+Record the real public URL here after deployment:
+
+**Live URL:** `TBD — set after deployment`
+
+Health endpoint:
+
+`/jackmart/api/v1/health`

@@ -1,0 +1,15 @@
+package com.jack.jackmart.util;
+
+import javax.servlet.http.HttpServletRequest;
+
+/**
+ * Small security helpers used by servlet code and tests.
+ */
+public final class SecurityUtil {
+    private SecurityUtil() {}
+
+    public static boolean isSecureRequest(HttpServletRequest request) {
+        return request.isSecure()
+                || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"));
+    }
+}

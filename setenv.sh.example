@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_NAME="${APP_NAME:-jackmart}"
+TOMCAT_HOME="${TOMCAT_HOME:?Set TOMCAT_HOME to your Tomcat 9 installation}"
+WAR_FILE="${WAR_FILE:-target/${APP_NAME}.war}"
+
+if [[ ! -f "$WAR_FILE" ]]; then
+  echo "WAR not found: $WAR_FILE"
+  echo "Run: mvn clean package"
+  exit 1
+fi
+
+mkdir -p "$TOMCAT_HOME/webapps"
+rm -rf "$TOMCAT_HOME/webapps/$APP_NAME" "$TOMCAT_HOME/webapps/$APP_NAME.war"
+cp "$WAR_FILE" "$TOMCAT_HOME/webapps/$APP_NAME.war"
+
+echo "Deployed $WAR_FILE as $APP_NAME.war"
+echo "Restart Tomcat using your service manager, for example:"
+echo "  sudo systemctl restart tomcat"
