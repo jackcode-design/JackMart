@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet({"/admin/dashboard", "/api/v1/admin/users", "/api/v1/admin/orders",
     "/api/v1/admin/products/*", "/api/v1/reviews/*"})
 public class AdminServlet extends BaseServlet {
+  /** Products shown on the admin dashboard. */
+  public static final int ADMIN_LIST_LIMIT = 50;
   private ProductService products = new ProductService(DAOFactory.products());
 
   @Override
@@ -41,7 +43,7 @@ public class AdminServlet extends BaseServlet {
       }
       req.setAttribute("users", DAOFactory.users().findAll());
       req.setAttribute("orders", DAOFactory.orders().findAll());
-      req.setAttribute("products", DAOFactory.products().findAll(50, 0));
+      req.setAttribute("products", DAOFactory.products().findAll(ADMIN_LIST_LIMIT, 0));
       req.getRequestDispatcher("/WEB-INF/views/admin/dashboard.jsp").forward(req, resp);
     } catch (Exception e) {
       if (uri.startsWith("/api/")) {

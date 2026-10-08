@@ -7,8 +7,12 @@ import com.js.jsmart.filter.AuthFilter;
 import com.js.jsmart.model.Role;
 import com.js.jsmart.model.User;
 import com.js.jsmart.service.AuthService;
+import com.js.jsmart.service.chat.ChatProvider;
 import com.js.jsmart.service.chat.ChatService;
 import com.js.jsmart.service.chat.MockChatProvider;
+import com.zaxxer.hikari.HikariDataSource;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.FilterChain;
@@ -62,8 +66,8 @@ class ServletSecurityTest {
     HttpServletRequest req = mock(HttpServletRequest.class);
     HttpServletResponse resp = mock(HttpServletResponse.class);
     FilterChain chain = mock(FilterChain.class);
-    when(req.getRequestURI()).thenReturn("/jsmart/api/v1/cart");
-    when(req.getContextPath()).thenReturn("/jsmart");
+    when(req.getRequestURI()).thenReturn("/jackmart/api/v1/cart");
+    when(req.getContextPath()).thenReturn("/jackmart");
     when(req.getSession(false)).thenReturn(null);
     java.io.StringWriter sw = new java.io.StringWriter();
     when(resp.getWriter()).thenReturn(new java.io.PrintWriter(sw));
@@ -83,20 +87,44 @@ class ServletSecurityTest {
     buyer.setRole(Role.BUYER);
     when(s.getAttribute("user")).thenReturn(buyer);
     when(req.getSession(false)).thenReturn(s);
-    when(req.getRequestURI()).thenReturn("/jsmart/admin/dashboard");
-    when(req.getContextPath()).thenReturn("/jsmart");
+    when(req.getRequestURI()).thenReturn("/jackmart/admin/dashboard");
+    when(req.getContextPath()).thenReturn("/jackmart");
     f.doFilter(req, resp, chain);
     verify(resp).sendError(403, "Forbidden");
     verify(chain, never()).doFilter(req, resp);
   }
 
   @Test
-  void xssPayloadPreservedButJspEscapes() {
-    String evil = "<script>alert(1)</script>";
-    // service layer must not execute; JSP uses c:out to escape at render
-    assertTrue(evil.contains("<script>"));
-    String escaped = evil.replace("<", "&lt;").replace(">", "&gt;");
-    assertFalse(escaped.contains("<script>"));
+  void userControlledFieldsRenderThroughCOut() throws Exception {
+    assertEscaped("src/main/webapp/WEB-INF/views/product-list.jsp",
+        "p.name", "p.category", "p.price", "param.q", "param.category");
+    assertEscaped("src/main/webapp/WEB-INF/views/product-detail.jsp",
+        "product.name", "product.description", "product.category", "r.comment", "r.userName");
+    assertEscaped("src/main/webapp/WEB-INF/views/orders.jsp",
+        "o.status", "i.productName", "param.success");
+    assertEscaped("src/main/webapp/WEB-INF/views/cart.jsp",
+        "i.productName", "i.unitPrice");
+  }
+
+  @Test
+  void chatWidgetEscapesAngleBrackets() throws Exception {
+    java.nio.file.Path js = java.nio.file.Path.of("src/main/webapp/assets/js/chat.js");
+    assertTrue(java.nio.file.Files.exists(js), "chat widget source must exist");
+    String content = java.nio.file.Files.readString(js);
+    assertTrue(content.contains(".replace(/</g, '&lt;')"),
+        "chat widget must escape < before injecting messages into the page");
+  }
+
+  private static void assertEscaped(String path, String... fields) throws Exception {
+    java.nio.file.Path file = java.nio.file.Path.of(path);
+    assertTrue(java.nio.file.Files.exists(file), "view must exist: " + path);
+    String content = java.nio.file.Files.readString(file);
+    for (String field : fields) {
+      String expr = "${" + field + "}";
+      boolean wrapped = content.contains("<c:out value=\"" + expr + "\"")
+          || content.contains("<c:out value='" + expr + "'");
+      assertTrue(wrapped, path + " must render " + expr + " through <c:out>");
+    }
   }
 
   @Test
@@ -124,7 +152,43 @@ class ServletSecurityTest {
   }
 
   @Test
-  void healthServletClassExists() {
-    assertNotNull(HealthServlet.class);
+  void chatCacheIsPerSession() {
+    final int[] calls = {0};
+    ChatProvider counting = (msg, ctx) -> "reply-" + (calls[0]++);
+    ChatService chat = new ChatService(counting);
+    Map<String, Object> first = new HashMap<>();
+    Map<String, Object> second = new HashMap<>();
+    String r1 = chat.reply(first, "hello", "ctx");
+    String r2 = chat.reply(second, "hello", "ctx");
+    assertNotEquals(r1, r2, "different sessions must not share cached replies");
+    assertEquals(2, calls[0], "provider must be called once per session");
+    assertEquals(r1, chat.reply(first, "hello", "ctx"), "same session must hit its own cache");
+    assertEquals(2, calls[0], "cached reply must not call provider again");
+  }
+
+  @Test
+  void healthReturnsUpWhenDbHealthy() throws Exception {
+    HikariDataSource ds = TestDb.init();
+    try {
+      var servlet = new HealthServlet() {
+        void invoke(HttpServletRequest req, HttpServletResponse resp) throws java.io.IOException {
+          doGet(req, resp);
+        }
+      };
+      HttpServletRequest req = mock(HttpServletRequest.class);
+      HttpServletResponse resp = mock(HttpServletResponse.class);
+      StringWriter sw = new StringWriter();
+      when(resp.getWriter()).thenReturn(new PrintWriter(sw));
+
+      servlet.invoke(req, resp);
+
+      verify(resp).setStatus(200);
+      verify(resp).setContentType("application/json;charset=UTF-8");
+      String body = sw.toString();
+      assertTrue(body.contains("\"status\":\"UP\""), "health body must report status UP: " + body);
+      assertTrue(body.contains("\"db\":\"UP\""), "health body must report db UP: " + body);
+    } finally {
+      ds.close();
+    }
   }
 }

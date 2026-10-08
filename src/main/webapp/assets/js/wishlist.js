@@ -1,6 +1,6 @@
 // Wishlist hearts (client-side only, localStorage). No backend changes.
 (function () {
-  var KEY = 'jsmart-wishlist';
+  var KEY = 'jackmart-wishlist';
   function load() {
     try {
       return JSON.parse(localStorage.getItem(KEY) || '[]');

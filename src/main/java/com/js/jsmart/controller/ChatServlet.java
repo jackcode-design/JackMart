@@ -12,9 +12,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-/** POST /api/chat + /api/v1/chat : chatbot endpoint. */
-@WebServlet({"/api/chat", "/api/v1/chat"})
+/**
+ * POST /api/v1/chat : chatbot endpoint (canonical).
+ * "/api/chat" is a deprecated compatibility alias and may be removed.
+ */
+@WebServlet({"/api/v1/chat", "/api/chat"})
 public class ChatServlet extends BaseServlet {
+  /** Products included in the server-side chat context. */
+  public static final int TOP_PRODUCTS_LIMIT = 5;
   private ChatService chat = new ChatService();
 
   @Override
@@ -32,44 +37,37 @@ public class ChatServlet extends BaseServlet {
         message = "";
       }
       HttpSession s = req.getSession(true);
+      // Bridge the per-session rate-limit list and reply cache into a session map.
+      // ChatService stores both back into this map; we persist them on the HttpSession
+      // so limits and cached replies never leak across sessions.
       Map<String, Object> scoped = new HashMap<>();
-      // bridge rate-limit list stored in real session
       Object hits = s.getAttribute("chatHits");
       if (hits instanceof java.util.List) {
-        @SuppressWarnings("unchecked")
-        java.util.List<Long> list = (java.util.List<Long>) hits;
-        scoped.put("chatHits", list);
-        String reply = chat.reply(syncBack(s, scoped), message, buildContext());
-        s.setAttribute("chatHits", scoped.get("chatHits"));
-        JsonUtil.write(resp, 200, ApiResponse.ok(java.util.Collections.singletonMap("reply", reply)));
-        return;
+        scoped.put("chatHits", hits);
       }
-      s.setAttribute("chatHits", scoped.computeIfAbsent("chatHits", k -> new java.util.ArrayList<Long>()));
-      @SuppressWarnings("unchecked")
-      Map<String, Object> live = new HashMap<>();
-      live.put("chatHits", s.getAttribute("chatHits"));
-      String reply = chat.reply(live, message, buildContext());
-      s.setAttribute("chatHits", live.get("chatHits"));
+      Object cached = s.getAttribute("chatCache");
+      if (cached instanceof Map) {
+        scoped.put("chatCache", cached);
+      }
+      String reply = chat.reply(scoped, message, buildContext());
+      s.setAttribute("chatHits", scoped.get("chatHits"));
+      s.setAttribute("chatCache", scoped.get("chatCache"));
       JsonUtil.write(resp, 200, ApiResponse.ok(java.util.Collections.singletonMap("reply", reply)));
     } catch (Exception e) {
       sendError(resp, e);
     }
   }
 
-  private Map<String, Object> syncBack(HttpSession s, Map<String, Object> scoped) {
-    return scoped;
-  }
-
   private String buildContext() {
     try {
-      var list = DAOFactory.products().findAll(5, 0);
+      var list = DAOFactory.products().findAll(TOP_PRODUCTS_LIMIT, 0);
       StringBuilder sb = new StringBuilder("Top products: ");
       for (var p : list) {
         sb.append(p.getName()).append(" (Rs.").append(p.getPrice()).append("); ");
       }
       return sb.toString();
     } catch (Exception e) {
-      return "JS Mart demo catalog";
+      return "JackMart demo catalog";
     }
   }
 

@@ -31,7 +31,7 @@ public class GeminiChatProvider implements ChatProvider {
       return fallback.getReply(userMessage, context) + " (offline mode)";
     }
     try {
-      String prompt = "You are the JS Mart store assistant. Only answer JS Mart product/listing/order questions."
+      String prompt = "You are the JackMart store assistant. Only answer JackMart product/listing/order questions."
           + " If unrelated, politely decline. Keep replies under 120 words.\nContext: "
           + (context == null ? "" : context) + "\nUser: " + userMessage;
       URL url = new URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + key);
@@ -68,9 +68,11 @@ public class GeminiChatProvider implements ChatProvider {
           .getAsJsonObject("content").getAsJsonArray("parts").get(0).getAsJsonObject()
           .get("text").getAsString();
       return text;
-    } catch (Exception e) {
+    } catch (java.io.IOException | RuntimeException e) {
+      // Degraded fallback is the specified behavior: network/JSON failures must never
+      // surface stack traces or error pages to the chat widget.
       LOG.warn("Gemini call failed, using degraded response", e);
-      return "JS Mart assistant is in offline mode right now. " + fallback.getReply(userMessage, context);
+      return "JackMart assistant is in offline mode right now. " + fallback.getReply(userMessage, context);
     }
   }
 }

@@ -18,6 +18,10 @@ import javax.servlet.http.HttpSession;
 /** POST /api/v1/auth/login : session login with ID regeneration + timeout. */
 @WebServlet("/api/v1/auth/login")
 public class LoginServlet extends BaseServlet {
+  /** Default session timeout in minutes when config is absent or invalid. */
+  public static final int DEFAULT_TIMEOUT_MINUTES = 30;
+  /** Seconds per minute for HttpSession interval conversion. */
+  public static final int SECONDS_PER_MINUTE = 60;
   private AuthService auth = new AuthService(DAOFactory.users());
 
   @Override
@@ -40,13 +44,14 @@ public class LoginServlet extends BaseServlet {
       }
       HttpSession s = req.getSession(true);
       s.setAttribute("user", u);
-      int timeoutMin = 30;
+      int timeoutMin = DEFAULT_TIMEOUT_MINUTES;
       try {
-        timeoutMin = Integer.parseInt(ConfigUtil.get("session.timeoutMinutes", "30"));
+        timeoutMin = Integer.parseInt(
+            ConfigUtil.get("session.timeoutMinutes", String.valueOf(DEFAULT_TIMEOUT_MINUTES)));
       } catch (NumberFormatException e) {
-        timeoutMin = 30;
+        timeoutMin = DEFAULT_TIMEOUT_MINUTES;
       }
-      s.setMaxInactiveInterval(timeoutMin * 60);
+      s.setMaxInactiveInterval(timeoutMin * SECONDS_PER_MINUTE);
       boolean isForm = req.getParameter("email") != null
           && (req.getContentType() == null || !req.getContentType().contains("json"));
       if (isForm) {
@@ -58,12 +63,14 @@ public class LoginServlet extends BaseServlet {
           home = "/seller/dashboard";
         }
         com.js.jsmart.util.Flash.successPage(req, "Login Successful! \uD83C\uDF89",
-            "Welcome back to JS Mart", "Continue Shopping", home);
+            "Welcome back to JackMart", "Continue Shopping", home);
         resp.sendRedirect(req.getContextPath() + "/success.jsp");
         return;
       }
       JsonUtil.write(resp, 200, ApiResponse.ok(UserResponseDTO.from(u)));
-    } catch (Exception e) {
+    } catch (IOException | RuntimeException e) {
+      // Centralized mapping: known failures become JSON/redirect responses via sendError,
+      // never container error pages. Errors (not Exceptions) still propagate.
       boolean isForm = req.getParameter("email") != null
           && (req.getContentType() == null || !req.getContentType().contains("json"));
       if (isForm) {
@@ -76,7 +83,7 @@ public class LoginServlet extends BaseServlet {
   }
 
   /** Visible for tests. */
-  public void setAuthService(AuthService auth) {
-    this.auth = auth;
+  public void setAuthService(AuthService authService) {
+    this.auth = authService;
   }
 }

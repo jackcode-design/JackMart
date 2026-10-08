@@ -34,7 +34,7 @@ public class RegisterServlet extends BaseServlet {
           && (req.getContentType() == null || !req.getContentType().contains("json"));
       if (isForm) {
         com.js.jsmart.util.Flash.successPage(req, "Registration Successful! \uD83C\uDF89",
-            "Your JS Mart account has been created successfully.",
+            "Your JackMart account has been created successfully.",
             "Go to Login", "/login.jsp");
         resp.sendRedirect(req.getContextPath() + "/success.jsp");
         return;
@@ -53,7 +53,7 @@ public class RegisterServlet extends BaseServlet {
   }
 
   /** Visible for tests. */
-  public void setAuthService(AuthService auth) {
-    this.auth = auth;
+  public void setAuthService(AuthService authService) {
+    this.auth = authService;
   }
 }

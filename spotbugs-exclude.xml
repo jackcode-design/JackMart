@@ -1,0 +1,135 @@
+<FindBugsFilter>
+  <!-- Servlets are container-managed singletons; injected service fields are stateless
+       collaborators set once at startup (plus test-only setters), never serialized. -->
+  <Match>
+    <Class name="com.js.jsmart.controller.AdminServlet"/>
+    <Bug pattern="SE_BAD_FIELD"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.CartServlet"/>
+    <Bug pattern="SE_BAD_FIELD"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.ChatServlet"/>
+    <Bug pattern="SE_BAD_FIELD"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.CheckoutServlet"/>
+    <Bug pattern="SE_BAD_FIELD"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.LoginServlet"/>
+    <Bug pattern="SE_BAD_FIELD"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.OrderServlet"/>
+    <Bug pattern="SE_BAD_FIELD"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.ProductServlet"/>
+    <Bug pattern="SE_BAD_FIELD"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.RegisterServlet"/>
+    <Bug pattern="SE_BAD_FIELD"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.ReviewServlet"/>
+    <Bug pattern="SE_BAD_FIELD"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.SellerServlet"/>
+    <Bug pattern="SE_BAD_FIELD"/>
+  </Match>
+  <!-- Test-only setter injection on controllers stores collaborators by design. -->
+  <Match>
+    <Class name="com.js.jsmart.controller.CartServlet"/>
+    <Method name="setCartService"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.CheckoutServlet"/>
+    <Method name="setServices"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.ProductServlet"/>
+    <Method name="setProductService"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.ReviewServlet"/>
+    <Method name="setReviewService"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.controller.SellerServlet"/>
+    <Method name="setProductService"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <!-- Constructor dependency injection stores collaborators by design; all services
+       are stateless and never mutate injected DAOs. -->
+  <Match>
+    <Class name="com.js.jsmart.service.AuthService"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.service.CartService"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.service.OrderService"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.service.ProductService"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.service.ReviewService"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <!-- Test seam exposing the DAO; AuthService never leaks it to callers. -->
+  <Match>
+    <Class name="com.js.jsmart.service.AuthService"/>
+    <Method name="getUserDAO"/>
+    <Bug pattern="EI_EXPOSE_REP"/>
+  </Match>
+  <!-- DAOFactory/DbUtil are Factory/Singleton holders by design; the pool and DAO
+       singletons are process-wide shared state, never caller-owned data. -->
+  <Match>
+    <Class name="com.js.jsmart.dao.DAOFactory"/>
+    <Bug pattern="MS_EXPOSE_REP"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.util.DbUtil"/>
+    <Bug pattern="MS_EXPOSE_REP"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.util.DbUtil"/>
+    <Bug pattern="EI_EXPOSE_STATIC_REP2"/>
+  </Match>
+  <!-- JSON envelope, validation-error carrier and order aggregate are server-side
+       transfer objects populated once per request and serialized read-only. -->
+  <Match>
+    <Class name="com.js.jsmart.dto.ApiResponse"/>
+    <Method name="getError"/>
+    <Bug pattern="EI_EXPOSE_REP"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.exception.ValidationException"/>
+    <Bug pattern="EI_EXPOSE_REP"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.exception.ValidationException"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.model.Order"/>
+    <Bug pattern="EI_EXPOSE_REP"/>
+  </Match>
+  <Match>
+    <Class name="com.js.jsmart.model.Order"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+</FindBugsFilter>

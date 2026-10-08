@@ -1,4 +1,4 @@
--- V1__init_schema.sql : JS Mart initial schema (H2 compatible)
+-- V1__init_schema.sql : JackMart initial schema (H2 compatible)
 -- Every table has created_at. FK columns indexed. Money DECIMAL(10,2).
 
 CREATE TABLE IF NOT EXISTS users (

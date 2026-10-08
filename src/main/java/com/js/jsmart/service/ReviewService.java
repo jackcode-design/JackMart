@@ -15,6 +15,12 @@ import java.util.Map;
  * Review rules: only delivered purchases, rating 1-5, no duplicates.
  */
 public class ReviewService {
+  /** Lowest accepted star rating. */
+  public static final int MIN_RATING = 1;
+  /** Highest accepted star rating. */
+  public static final int MAX_RATING = 5;
+  /** Longest accepted review comment. */
+  public static final int MAX_COMMENT_LENGTH = 2000;
   private final ReviewDAO reviewDAO;
   private final OrderDAO orderDAO;
 
@@ -27,10 +33,10 @@ public class ReviewService {
   /** Add review. */
   public long add(long userId, long productId, int rating, String comment) {
     Map<String, String> errors = new LinkedHashMap<>();
-    if (rating < 1 || rating > 5) {
+    if (rating < MIN_RATING || rating > MAX_RATING) {
       errors.put("rating", "Rating must be 1-5");
     }
-    if (comment != null && comment.length() > 2000) {
+    if (comment != null && comment.length() > MAX_COMMENT_LENGTH) {
       errors.put("comment", "Comment too long");
     }
     if (!errors.isEmpty()) {

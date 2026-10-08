@@ -16,6 +16,8 @@ import java.util.Map;
  * Product business rules incl. seller-ownership checks.
  */
 public class ProductService {
+  /** Fallback page size when the caller passes no positive limit. */
+  public static final int DEFAULT_LIMIT = 24;
   private final ProductDAO productDAO;
 
   /** Create service. */
@@ -40,7 +42,7 @@ public class ProductService {
       java.math.BigDecimal maxPrice, String sort, int limit, int offset) {
     try {
       List<Product> list =
-          productDAO.search(category, keyword, limit <= 0 ? 24 : limit, Math.max(0, offset));
+          productDAO.search(category, keyword, limit <= 0 ? DEFAULT_LIMIT : limit, Math.max(0, offset));
       if (minPrice != null) {
         list.removeIf(p -> p.getPrice() == null || p.getPrice().compareTo(minPrice) < 0);
       }

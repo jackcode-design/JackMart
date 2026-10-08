@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 /** Page + API for product browsing (F3). */
 @WebServlet({"/products", "/product", "/api/v1/products", "/api/v1/products/*"})
 public class ProductServlet extends BaseServlet {
+  /** Default page size for product browsing. */
+  public static final int BROWSE_LIMIT = 50;
   private ProductService products = new ProductService(DAOFactory.products());
   private ReviewService reviews =
       new ReviewService(DAOFactory.reviews(), DAOFactory.orders());
@@ -36,7 +38,7 @@ public class ProductServlet extends BaseServlet {
         String category = req.getParameter("category");
         String q = req.getParameter("q");
         List<Product> list = products.browse(category, q, price(req.getParameter("minPrice")),
-            price(req.getParameter("maxPrice")), req.getParameter("sort"), 50, 0);
+            price(req.getParameter("maxPrice")), req.getParameter("sort"), BROWSE_LIMIT, 0);
         com.js.jsmart.util.JsonUtil.write(resp, 200, ApiResponse.ok(list));
         return;
       }
@@ -58,7 +60,7 @@ public class ProductServlet extends BaseServlet {
       String sort = req.getParameter("sort");
       req.setAttribute("products",
           products.browse(category, q, price(req.getParameter("minPrice")),
-              price(req.getParameter("maxPrice")), sort, 50, 0));
+              price(req.getParameter("maxPrice")), sort, BROWSE_LIMIT, 0));
       req.getRequestDispatcher("/WEB-INF/views/product-list.jsp").forward(req, resp);
     } catch (NumberFormatException e) {
       if (isApi) {

@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %><%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE html><html><head><title>JS Mart</title>
+<!DOCTYPE html><html><head><title>JackMart</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css"/></head><body>
 <c:choose>
@@ -7,7 +7,7 @@
 <main class="landing">
   <div class="landingcard">
     <div class="landingicon">🛍️</div>
-    <h1>Welcome to JS Mart</h1>
+    <h1>Welcome to JackMart</h1>
     <p class="tagline">Your one-stop marketplace for everything you love.</p>
     <p class="muted">50 products across mobiles, fashion, home, beauty, books, toys and sports.</p>
     <div class="landingactions">
@@ -20,7 +20,7 @@
 <c:otherwise>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <main class="wrap">
-<h1>Welcome to JS Mart</h1>
+<h1>Welcome to JackMart</h1>
 <p>Demo e-commerce: browse, cart, mock checkout, reviews, chatbot.</p>
 <p><a class="btn" href="${pageContext.request.contextPath}/products">Browse products</a></p>
 <h2>Shop by category</h2>

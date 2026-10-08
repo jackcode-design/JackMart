@@ -1,4 +1,4 @@
 package com.js.jsmart.model;
 
-/** User role supported by JS Mart. */
+/** User role supported by JackMart. */
 public enum Role { BUYER, SELLER, ADMIN }

@@ -7,10 +7,19 @@
     <module name="NeedBraces"/>
     <module name="AvoidStarImport"/>
     <module name="UnusedImports"/>
-    <module name="HiddenField"><property name="ignoreConstructorParameter" value="true"/></module>
+    <!-- JavaBean setters use same-name parameters by convention; constructors already ignored. -->
+    <module name="HiddenField">
+      <property name="ignoreConstructorParameter" value="true"/>
+      <property name="ignoreSetter" value="true"/>
+    </module>
     <module name="MagicNumber"><property name="ignoreNumbers" value="-1,0,1,2,10,100,200,201,400,401,403,404,409,500"/></module>
     <module name="Indentation"><property name="basicOffset" value="2"/><property name="caseIndent" value="2"/></module>
   </module>
   <module name="LineLength"><property name="max" value="140"/></module>
   <module name="FileTabCharacter"/>
+  <!-- Targeted: JDBC 1-based positional indices and static demo-seed data are data, not
+       logic. Every other MagicNumber was replaced with a named constant. -->
+  <module name="SuppressionFilter">
+    <property name="file" value="suppressions.xml"/>
+  </module>
 </module>

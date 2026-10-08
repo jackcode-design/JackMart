@@ -31,7 +31,7 @@ public class AppContextListener implements ServletContextListener {
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     ConfigUtil.init(sce.getServletContext());
-    String url = ConfigUtil.get("db.url", "jdbc:h2:./data/jsmart;DB_CLOSE_DELAY=-1");
+    String url = ConfigUtil.get("db.url", "jdbc:h2:./data/jackmart;DB_CLOSE_DELAY=-1");
     String user = ConfigUtil.get("db.user", "sa");
     String pass = ConfigUtil.get("db.password", "");
     HikariConfig cfg = new HikariConfig();
@@ -40,42 +40,47 @@ public class AppContextListener implements ServletContextListener {
     cfg.setUsername(user);
     cfg.setPassword(pass);
     cfg.setMaximumPoolSize(10);
-    cfg.setPoolName("jsmart-pool");
+    cfg.setPoolName("jackmart-pool");
     ds = new HikariDataSource(cfg);
     DbUtil.setDataSource(ds);
     sce.getServletContext().setAttribute("dataSource", ds);
     runMigrationAndSeed();
-    LOG.info("JS Mart started with db {}", url);
+    LOG.info("JackMart started with db {}", url);
   }
 
   private void runMigrationAndSeed() {
     try (Connection c = ds.getConnection();
          Statement st = c.createStatement()) {
-      Path mig = Paths.get("db", "migrations", "V1__init_schema.sql");
-      if (!Files.exists(mig)) {
-        mig = Paths.get(System.getProperty("user.dir"), "db", "migrations", "V1__init_schema.sql");
-      }
-      URLFallback: {
+      String[] files = {
+          "V1__init_schema.sql", "V2__add_reviews_table.sql", "V3__add_index_orders_status.sql"};
+      boolean anyFile = false;
+      for (String name : files) {
+        Path mig = Paths.get("db", "migrations", name);
         if (!Files.exists(mig)) {
-          try (java.io.InputStream in = getClass().getClassLoader().getResourceAsStream("schema.sql")) {
-            if (in != null) {
-              String sql = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-              for (String s : sql.split(";")) {
-                if (!s.isBlank()) {
-                  st.execute(s);
-                }
+          mig = Paths.get(System.getProperty("user.dir"), "db", "migrations", name);
+        }
+        if (Files.exists(mig)) {
+          anyFile = true;
+          String sql = Files.readString(mig, StandardCharsets.UTF_8);
+          for (String s : sql.split(";")) {
+            if (!s.isBlank()) {
+              st.execute(s);
+            }
+          }
+        }
+      }
+      if (!anyFile) {
+        try (java.io.InputStream in = getClass().getClassLoader().getResourceAsStream("schema.sql")) {
+          if (in != null) {
+            String sql = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            for (String s : sql.split(";")) {
+              if (!s.isBlank()) {
+                st.execute(s);
               }
             }
-          } catch (Exception e) {
-            LOG.warn("No schema resource", e);
           }
-          break URLFallback;
-        }
-        String sql = Files.readString(mig, StandardCharsets.UTF_8);
-        for (String s : sql.split(";")) {
-          if (!s.isBlank()) {
-            st.execute(s);
-          }
+        } catch (Exception e) {
+          LOG.warn("No schema resource", e);
         }
       }
       // seed demo users (BCrypt) if empty
@@ -99,11 +104,11 @@ public class AppContextListener implements ServletContextListener {
   private void seed(Connection c) throws Exception {
     String sql = "INSERT INTO users (email, password_hash, full_name, user_role) VALUES (?, ?, ?, ?)";
     Object[][] users = {
-        {"admin@jsmart.local", "Admin@123", "JS Mart Admin", "ADMIN"},
-        {"seller1@jsmart.local", "Seller@123", "Asha Seller", "SELLER"},
-        {"seller2@jsmart.local", "Seller@123", "Ravi Seller", "SELLER"},
-        {"buyer1@jsmart.local", "Buyer@123", "Meera Buyer", "BUYER"},
-        {"buyer2@jsmart.local", "Buyer@123", "Arjun Buyer", "BUYER"},
+        {"admin@jackmart.local", "Admin@123", "JackMart Admin", "ADMIN"},
+        {"seller1@jackmart.local", "Seller@123", "Asha Seller", "SELLER"},
+        {"seller2@jackmart.local", "Seller@123", "Ravi Seller", "SELLER"},
+        {"buyer1@jackmart.local", "Buyer@123", "Meera Buyer", "BUYER"},
+        {"buyer2@jackmart.local", "Buyer@123", "Arjun Buyer", "BUYER"},
     };
     for (Object[] u : users) {
       try (PreparedStatement ps = c.prepareStatement(sql)) {
@@ -240,6 +245,6 @@ public class AppContextListener implements ServletContextListener {
     if (ds != null && !ds.isClosed()) {
       ds.close();
     }
-    LOG.info("JS Mart stopped, pool closed");
+    LOG.info("JackMart stopped, pool closed");
   }
 }

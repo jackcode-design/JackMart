@@ -4,11 +4,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.js</groupId>
-  <artifactId>jsmart</artifactId>
+  <artifactId>jackmart</artifactId>
   <version>1.1.0</version>
   <packaging>war</packaging>
-  <name>JS Mart</name>
-  <description>JS Mart - Servlet/JSP/JDBC e-commerce capstone (JDK17, Tomcat 9, H2, HikariCP)</description>
+  <name>JackMart</name>
+  <description>JackMart - Servlet/JSP/JDBC e-commerce capstone (JDK17, Tomcat 9, H2, HikariCP)</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -94,7 +94,7 @@
   </dependencies>
 
   <build>
-    <finalName>jsmart</finalName>
+    <finalName>jackmart</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -137,6 +137,8 @@
           <effort>Default</effort>
           <threshold>Medium</threshold>
           <failOnError>false</failOnError>
+          <!-- Targeted idiom exclusions with per-finding rationale live here. -->
+          <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
         </configuration>
         <executions>
           <execution>

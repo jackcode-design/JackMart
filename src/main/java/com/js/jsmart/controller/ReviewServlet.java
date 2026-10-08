@@ -44,10 +44,16 @@ public class ReviewServlet extends BaseServlet {
       JsonUtil.write(resp, 201, ApiResponse.ok(java.util.Collections.singletonMap("id", id)));
     } catch (Exception e) {
       if (req.getContentType() == null || !req.getContentType().contains("json")) {
-        String pid = req.getParameter("productId");
+        // Rebuild the redirect from a parsed long so raw request bytes never reach a header.
+        String target = req.getContextPath() + "/products";
+        try {
+          target = req.getContextPath() + "/product?id=" + Long.parseLong(req.getParameter("productId"));
+        } catch (NumberFormatException ignore) {
+          log.debug("Review redirect without product id");
+        }
         com.js.jsmart.util.Flash.error(req, friendly(e));
         try {
-          resp.sendRedirect(req.getContextPath() + "/product?id=" + (pid == null ? "" : pid));
+          resp.sendRedirect(target);
         } catch (IOException ex) {
           log.error("review redirect failed", ex);
         }

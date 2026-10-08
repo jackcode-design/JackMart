@@ -16,12 +16,14 @@ import org.slf4j.MDC;
  * Request logging filter: generates request ID, attaches to MDC, logs, cleans MDC.
  */
 public class RequestLoggingFilter implements Filter {
+  /** Characters kept from the random request ID in logs. */
+  public static final int REQUEST_ID_LENGTH = 8;
   private static final Logger LOG = LoggerFactory.getLogger(RequestLoggingFilter.class);
 
   @Override
   public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
       throws IOException, ServletException {
-    String id = UUID.randomUUID().toString().substring(0, 8);
+    String id = UUID.randomUUID().toString().substring(0, REQUEST_ID_LENGTH);
     MDC.put("requestId", id);
     try {
       if (req instanceof HttpServletRequest) {

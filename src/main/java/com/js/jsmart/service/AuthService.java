@@ -1,7 +1,5 @@
 package com.js.jsmart.service;
 
-import com.js.jsmart.dao.OrderDAO;
-import com.js.jsmart.dao.ProductDAO;
 import com.js.jsmart.dao.UserDAO;
 import com.js.jsmart.dto.RegisterRequest;
 import com.js.jsmart.dto.UserResponseDTO;

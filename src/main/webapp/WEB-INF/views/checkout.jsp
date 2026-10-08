@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %><%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE html><html><head><title>Checkout - JS Mart</title>
+<!DOCTYPE html><html><head><title>Checkout - JackMart</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css"/></head><body>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <main class="wrap narrow">

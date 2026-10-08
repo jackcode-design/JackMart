@@ -22,7 +22,7 @@ public class LogoutServlet extends BaseServlet {
       return;
     }
     com.js.jsmart.util.Flash.successPage(req, "Logged Out Successfully! \uD83C\uDF89",
-        "Thanks for shopping with JS Mart. See you again!",
+        "Thanks for shopping with JackMart. See you again!",
         "Go to Login", "/login.jsp");
     resp.sendRedirect(req.getContextPath() + "/success.jsp");
   }

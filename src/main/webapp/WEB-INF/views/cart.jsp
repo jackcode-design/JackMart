@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %><%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE html><html><head><title>Cart - JS Mart</title>
+<!DOCTYPE html><html><head><title>Cart - JackMart</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css"/>
 <script src="${pageContext.request.contextPath}/assets/js/app.js" defer></script></head><body>

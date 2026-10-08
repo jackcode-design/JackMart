@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
  */
 public final class ValidationUtil {
   private static final Pattern EMAIL = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+  /** Shortest accepted password. */
+  public static final int MIN_PASSWORD_LENGTH = 6;
 
   private ValidationUtil() { }
 
@@ -24,7 +26,7 @@ public final class ValidationUtil {
     if (!isEmail(email)) {
       e.put("email", "Invalid email");
     }
-    if (password == null || password.length() < 6) {
+    if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
       e.put("password", "Password must be at least 6 characters");
     }
     if (name == null || name.trim().isEmpty()) {

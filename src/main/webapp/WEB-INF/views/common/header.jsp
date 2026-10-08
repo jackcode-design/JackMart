@@ -1,6 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <header class="nav">
-  <a class="brand" href="${pageContext.request.contextPath}/index.jsp">🛒 JS Mart</a>
+  <a class="brand" href="${pageContext.request.contextPath}/index.jsp">🛒 JackMart</a>
   <form class="search" action="${pageContext.request.contextPath}/products" method="get">
     <input name="q" placeholder="Search for products, brands and more..." value="<c:out value='${param.q}'/>"/>
     <select name="category">

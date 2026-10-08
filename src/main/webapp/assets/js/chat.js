@@ -1,4 +1,4 @@
-// Floating chat widget -> POST /api/chat
+// Floating chat widget -> POST /api/v1/chat (canonical)
 (function () {
   function base() {
     const p = window.location.pathname.split('/');
@@ -14,13 +14,13 @@
       if (!msg) return;
       body.innerHTML += '<div><b>You:</b> ' + msg.replace(/</g, '&lt;') + '</div>';
       inp.value = '';
-      const res = await fetch(base() + '/api/chat', {
+      const res = await fetch(base() + '/api/v1/chat', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg })
       });
       const json = await res.json();
       const reply = json.data && json.data.reply ? json.data.reply : 'Offline right now.';
-      body.innerHTML += '<div><b>JS Mart:</b> ' + reply.replace(/</g, '&lt;') + '</div>';
+      body.innerHTML += '<div><b>JackMart:</b> ' + reply.replace(/</g, '&lt;') + '</div>';
       body.scrollTop = body.scrollHeight;
     }
   });

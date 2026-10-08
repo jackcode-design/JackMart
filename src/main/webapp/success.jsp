@@ -2,7 +2,7 @@
 <c:if test="${empty sessionScope.successTitle}">
   <c:redirect url="/index.jsp"/>
 </c:if>
-<!DOCTYPE html><html><head><title><c:out value="${sessionScope.successTitle}"/> - JS Mart</title>
+<!DOCTYPE html><html><head><title><c:out value="${sessionScope.successTitle}"/> - JackMart</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css"/></head><body>
 <main class="successwrap">

@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
 
-  <display-name>JS Mart</display-name>
+  <display-name>JackMart</display-name>
 
   <listener>
     <listener-class>com.js.jsmart.listener.AppContextListener</listener-class>

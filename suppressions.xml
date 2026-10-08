@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+  "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+  <!-- JDBC PreparedStatement positional parameter indices are 1-based by API design. -->
+  <suppress checks="MagicNumber" files="Jdbc[A-Za-z]+\.java"/>
+  <!-- Demo seed catalog rows and seed-column indices in the bootstrap listener are
+       static data, not business logic. -->
+  <suppress checks="MagicNumber" files="AppContextListener\.java"/>
+</suppressions>

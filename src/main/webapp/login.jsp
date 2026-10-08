@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %><%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE html><html><head><title>Login - JS Mart</title>
+<!DOCTYPE html><html><head><title>Login - JackMart</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css"/></head><body>
 <jsp:include page="/WEB-INF/views/common/header.jsp"/>
 <main class="wrap narrow">
@@ -14,7 +14,7 @@
 <label>Password <input name="password" type="password" required/></label>
 <button class="btn" type="submit">Login</button>
 </form>
-<p>Demo: buyer1@jsmart.local / Buyer@123 · seller1@jsmart.local / Seller@123 · admin@jsmart.local / Admin@123</p>
+<p>Demo: buyer1@jackmart.local / Buyer@123 · seller1@jackmart.local / Seller@123 · admin@jackmart.local / Admin@123</p>
 </main>
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>
 </body></html>

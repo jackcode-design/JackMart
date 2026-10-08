@@ -1,0 +1,12 @@
+# Keep the Docker build context lean: only pom.xml, src/, db/ and the
+# quality-gate configs are ever COPYed into the image.
+target/
+.git/
+data/
+logs/
+.env
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

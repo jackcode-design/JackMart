@@ -1,7 +1,7 @@
-# Final report — JS Mart (matches actual implementation)
+# Final report — JackMart (matches actual implementation)
 1. Problem: small sellers need a simple Java storefront without framework lock-in.
 2. Objective: F1–F8 + mandatory chatbot on Servlet/JSP/JDBC/Tomcat.
-3. Requirements: PDF is source of truth; naming `JS Mart/jsmart/com.js.jsmart`.
+3. Requirements: PDF is source of truth; naming `JackMart/jackmart/com.js.jsmart`.
 4. Architecture: Browser→Filters→Servlets(thin)→Services→DAO→HikariCP→H2. See README diagram.
 5. Stack: JDK17, Maven, Tomcat 9, javax.servlet, JSP/JSTL, vanilla JS fetch, JDBC, H2, HikariCP, Gson, jBCrypt, JUnit5, Mockito, SLF4J/Logback, Actions, Checkstyle, SpotBugs.
 6. Database: 6 tables (users/products/orders/order_items/cart_items/reviews), FKs indexed, email UNIQUE, DECIMAL(10,2), created_at everywhere; `db/migrations/V1__init_schema.sql`; seed separate.

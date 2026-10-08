@@ -6,10 +6,21 @@ import java.util.Map;
 
 /**
  * Chat service: provider selection (Factory), rate limit, length cap, per-session cache.
+ * The repeat-response cache is stored in the caller's session map, so different
+ * sessions never share cached replies.
  */
 public class ChatService {
+  /** Maximum accepted message length; longer input is truncated. */
+  public static final int MAX_MESSAGE_LENGTH = 500;
+  /** Maximum messages accepted per session within the rate-limit window. */
+  public static final int MAX_MESSAGES_PER_MINUTE = 10;
+  /** Sliding rate-limit window in milliseconds. */
+  public static final long RATE_LIMIT_WINDOW_MS = 60_000L;
+  private static final String HITS_KEY = "chatHits";
+  private static final String CACHE_KEY = "chatCache";
+  private static final int DEFAULT_TIMEOUT_MS = 8000;
+
   private final ChatProvider provider;
-  private final Map<String, String> cache = new HashMap<>();
 
   /** Build from config ai.chatbot.provider. */
   public ChatService() {
@@ -18,7 +29,7 @@ public class ChatService {
     try {
       timeout = Integer.parseInt(ConfigUtil.get("gemini.api.timeoutMs", "8000"));
     } catch (NumberFormatException e) {
-      timeout = 8000;
+      timeout = DEFAULT_TIMEOUT_MS;
     }
     if ("gemini".equalsIgnoreCase(name)) {
       this.provider = new GeminiChatProvider(timeout);
@@ -34,7 +45,7 @@ public class ChatService {
 
   /**
    * Reply with guards.
-   * @param session session map for rate-limit + cache
+   * @param session session map holding rate-limit hits and the per-session reply cache
    * @param message user message
    * @param context product context
    * @return reply
@@ -44,18 +55,21 @@ public class ChatService {
       message = "";
     }
     message = message.trim();
-    if (message.length() > 500) {
-      message = message.substring(0, 500);
+    if (message.length() > MAX_MESSAGE_LENGTH) {
+      message = message.substring(0, MAX_MESSAGE_LENGTH);
     }
     long now = System.currentTimeMillis();
     @SuppressWarnings("unchecked")
-    java.util.List<Long> hits = (java.util.List<Long>) session.computeIfAbsent("chatHits",
+    java.util.List<Long> hits = (java.util.List<Long>) session.computeIfAbsent(HITS_KEY,
         k -> new java.util.ArrayList<Long>());
-    hits.removeIf(t -> now - t > 60_000);
-    if (hits.size() >= 10) {
+    hits.removeIf(t -> now - t > RATE_LIMIT_WINDOW_MS);
+    if (hits.size() >= MAX_MESSAGES_PER_MINUTE) {
       return "Rate limit: please wait a moment (10 messages/minute).";
     }
     hits.add(now);
+    @SuppressWarnings("unchecked")
+    Map<String, String> cache = (Map<String, String>) session.computeIfAbsent(CACHE_KEY,
+        k -> new HashMap<String, String>());
     String key = message.toLowerCase();
     if (cache.containsKey(key)) {
       return cache.get(key);

@@ -5,5 +5,5 @@
     <circle cx="320" cy="205" r="28"/>
     <path d="M220 285 L280 235 L330 275 L370 245 L420 285"/>
   </g>
-  <text x="320" y="340" font-family="Arial,sans-serif" font-size="28" fill="#6b7280" text-anchor="middle">JS Mart</text>
+  <text x="320" y="340" font-family="Arial,sans-serif" font-size="28" fill="#6b7280" text-anchor="middle">JackMart</text>
 </svg>

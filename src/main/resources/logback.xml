@@ -5,7 +5,7 @@
     </encoder>
   </appender>
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>${catalina.base:-.}/logs/jsmart.log</file>
+    <file>${catalina.base:-.}/logs/jackmart.log</file>
     <append>true</append>
     <encoder>
       <pattern>%d{yyyy-MM-dd HH:mm:ss} [%X{requestId}] %-5level %logger{36} - %msg%n%ex</pattern>
