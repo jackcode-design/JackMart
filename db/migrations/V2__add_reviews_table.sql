@@ -1,5 +1,5 @@
--- V2__add_reviews_table.sql : reviews table (idempotent; already part of V1 for fresh installs).
--- Do not hand-edit live tables; every schema change is a new numbered file.
+-- V2__add_reviews_table.sql : standalone reviews table for existing databases.
+-- Fresh installs already get this table from V1. Never hand-edit a live table.
 CREATE TABLE IF NOT EXISTS reviews (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   product_id BIGINT NOT NULL,

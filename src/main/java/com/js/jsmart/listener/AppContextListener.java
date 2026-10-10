@@ -2,6 +2,7 @@ package com.js.jsmart.listener;
 
 import com.js.jsmart.util.ConfigUtil;
 import com.js.jsmart.util.PasswordUtil;
+import com.js.jsmart.util.SqlScriptRunner;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import com.js.jsmart.util.DbUtil;
@@ -49,8 +50,24 @@ public class AppContextListener implements ServletContextListener {
   }
 
   private void runMigrationAndSeed() {
-    try (Connection c = ds.getConnection();
-         Statement st = c.createStatement()) {
+    try {
+      migrateAndSeed(ds);
+    } catch (Exception e) {
+      LOG.error("Migration failed", e);
+    }
+  }
+
+  /**
+   * Applies db/migrations V1..V3 in order (or the bundled schema.sql fallback),
+   * then runs idempotent demo seeds. Every statement is additive and guarded by
+   * IF NOT EXISTS / empty-table checks, so fresh installs, restarts and
+   * redeployments are safe and existing rows are never touched.
+   * Public static so automated tests exercise this exact production path.
+   * @param ds initialized connection pool
+   * @throws Exception on migration or seed failure
+   */
+  public static void migrateAndSeed(HikariDataSource ds) throws Exception {
+    try (Connection c = ds.getConnection()) {
       String[] files = {
           "V1__init_schema.sql", "V2__add_reviews_table.sql", "V3__add_index_orders_status.sql"};
       boolean anyFile = false;
@@ -61,47 +78,39 @@ public class AppContextListener implements ServletContextListener {
         }
         if (Files.exists(mig)) {
           anyFile = true;
-          String sql = Files.readString(mig, StandardCharsets.UTF_8);
-          for (String s : sql.split(";")) {
-            if (!s.isBlank()) {
-              st.execute(s);
-            }
-          }
+          SqlScriptRunner.execute(c, Files.readString(mig, StandardCharsets.UTF_8));
         }
       }
       if (!anyFile) {
-        try (java.io.InputStream in = getClass().getClassLoader().getResourceAsStream("schema.sql")) {
+        try (java.io.InputStream in = AppContextListener.class.getClassLoader()
+            .getResourceAsStream("schema.sql")) {
           if (in != null) {
-            String sql = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-            for (String s : sql.split(";")) {
-              if (!s.isBlank()) {
-                st.execute(s);
-              }
-            }
+            SqlScriptRunner.execute(c,
+                new String(in.readAllBytes(), StandardCharsets.UTF_8));
           }
         } catch (Exception e) {
           LOG.warn("No schema resource", e);
         }
       }
       // seed demo users (BCrypt) if empty
-      try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM users")) {
+      try (Statement st = c.createStatement();
+           ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM users")) {
         rs.next();
         if (rs.getLong(1) == 0) {
           seed(c);
         }
       }
-      try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM products")) {
+      try (Statement st = c.createStatement();
+           ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM products")) {
         rs.next();
         if (rs.getLong(1) == 0) {
           seedProducts(c);
         }
       }
-    } catch (Exception e) {
-      LOG.error("Migration failed", e);
     }
   }
 
-  private void seed(Connection c) throws Exception {
+  private static void seed(Connection c) throws Exception {
     String sql = "INSERT INTO users (email, password_hash, full_name, user_role) VALUES (?, ?, ?, ?)";
     Object[][] users = {
         {"admin@jackmart.local", "Admin@123", "JackMart Admin", "ADMIN"},
@@ -121,7 +130,7 @@ public class AppContextListener implements ServletContextListener {
     }
   }
 
-  private void seedProducts(Connection c) throws Exception {
+  private static void seedProducts(Connection c) throws Exception {
     String sql = "INSERT INTO products (seller_id, name, description, price, stock_qty, category, image_url)"
         + " VALUES (?, ?, ?, ?, ?, ?, ?)";
     Object[][] rows = {
